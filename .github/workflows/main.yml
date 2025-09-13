@@ -1,4 +1,4 @@
-name: Build Android APK with React Native CLI
+name: Build Android APK with Fixed Node
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         
     - name: Install dependencies
       run: npm install
@@ -61,8 +61,8 @@ jobs:
       
     - name: Create React Native project
       run: |
-        # Create a new React Native project
-        npx react-native init BookneticApp --template react-native-template-typescript
+        # Create a new React Native project without TypeScript template
+        npx react-native init BookneticApp
         
     - name: Copy app files
       run: |
