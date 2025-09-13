@@ -1,4 +1,4 @@
-name: Build Android APK with Turtle
+name: Build Android APK with React Native CLI
 
 on:
   workflow_dispatch:
@@ -50,13 +50,41 @@ jobs:
         sed -i "s|{{SECONDARY_COLOR}}|${{ github.event.inputs.secondary_color }}|g" config/colors.js
         sed -i "s|{{LOGO_URL}}|${{ github.event.inputs.logo_url }}|g" config/branding.js
         
-    - name: Install Turtle CLI
-      run: npm install -g turtle-cli
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
       
-    - name: Build APK with Turtle
+    - name: Create React Native project
       run: |
-        # Build APK using Turtle CLI
-        turtle build:android --type apk --output ./app.apk
+        # Create a new React Native project
+        npx react-native init BookneticApp --template react-native-template-typescript
+        
+    - name: Copy app files
+      run: |
+        # Copy our app files to the new project
+        cp -r . BookneticApp/
+        cd BookneticApp
+        
+    - name: Install project dependencies
+      run: |
+        cd BookneticApp
+        npm install
+        cd android && ./gradlew clean && cd ..
+        
+    - name: Build APK
+      run: |
+        cd BookneticApp
+        cd android
+        ./gradlew assembleDebug
+        
+    - name: Copy APK
+      run: |
+        cp BookneticApp/android/app/build/outputs/apk/debug/app-debug.apk ./app.apk
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
