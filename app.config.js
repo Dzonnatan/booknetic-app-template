@@ -1,0 +1,37 @@
+export default {
+  expo: {
+    name: "{{APP_NAME}}",
+    slug: "booknetic-app",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/icon.png",
+    userInterfaceStyle: "light",
+    splash: {
+      image: "./assets/splash.png",
+      resizeMode: "contain",
+      backgroundColor: "{{PRIMARY_COLOR}}"
+    },
+    assetBundlePatterns: [
+      "**/*"
+    ],
+    ios: {
+      supportsTablet: true
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/adaptive-icon.png",
+        backgroundColor: "{{PRIMARY_COLOR}}"
+      },
+      package: "com.booknetic.app",
+      permissions: [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    web: {
+      favicon: "./assets/favicon.png"
+    }
+  }
+};
