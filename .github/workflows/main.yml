@@ -36,7 +36,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install dependencies
       run: npm install
@@ -44,12 +43,12 @@ jobs:
     - name: Configure app
       run: |
         # Update app configuration with provided values
-        sed -i "s/{{APP_NAME}}/${{ github.event.inputs.app_name }}/g" app.json
-        sed -i "s/{{SITE_URL}}/${{ github.event.inputs.site_url }}/g" config/api.js
-        sed -i "s/{{WORDPRESS_URL}}/${{ github.event.inputs.site_url }}/g" config/api.js
-        sed -i "s/{{PRIMARY_COLOR}}/${{ github.event.inputs.primary_color }}/g" config/colors.js
-        sed -i "s/{{SECONDARY_COLOR}}/${{ github.event.inputs.secondary_color }}/g" config/colors.js
-        sed -i "s/{{LOGO_URL}}/${{ github.event.inputs.logo_url }}/g" config/branding.js
+        sed -i "s|{{APP_NAME}}|${{ github.event.inputs.app_name }}|g" app.json
+        sed -i "s|{{SITE_URL}}|${{ github.event.inputs.site_url }}|g" config/api.js
+        sed -i "s|{{WORDPRESS_URL}}|${{ github.event.inputs.site_url }}|g" config/api.js
+        sed -i "s|{{PRIMARY_COLOR}}|${{ github.event.inputs.primary_color }}|g" config/colors.js
+        sed -i "s|{{SECONDARY_COLOR}}|${{ github.event.inputs.secondary_color }}|g" config/colors.js
+        sed -i "s|{{LOGO_URL}}|${{ github.event.inputs.logo_url }}|g" config/branding.js
         
     - name: Install Turtle CLI
       run: npm install -g turtle-cli
