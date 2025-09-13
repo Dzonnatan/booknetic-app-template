@@ -1,0 +1,80 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'App Name'
+        required: true
+        default: 'Booknetic App'
+      site_url:
+        description: 'WordPress Site URL'
+        required: true
+        default: 'https://example.com'
+      primary_color:
+        description: 'Primary Color'
+        required: true
+        default: '#007AFF'
+      secondary_color:
+        description: 'Secondary Color'
+        required: true
+        default: '#5856D6'
+      logo_url:
+        description: 'Logo URL'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies
+      run: npm install
+        
+    - name: Configure app
+      run: |
+        # Update app configuration with provided values
+        sed -i "s|{{APP_NAME}}|${{ github.event.inputs.app_name }}|g" app.json
+        sed -i "s|{{SITE_URL}}|${{ github.event.inputs.site_url }}|g" config/api.js
+        sed -i "s|{{WORDPRESS_URL}}|${{ github.event.inputs.site_url }}|g" config/api.js
+        sed -i "s|{{PRIMARY_COLOR}}|${{ github.event.inputs.primary_color }}|g" config/colors.js
+        sed -i "s|{{SECONDARY_COLOR}}|${{ github.event.inputs.secondary_color }}|g" config/colors.js
+        sed -i "s|{{LOGO_URL}}|${{ github.event.inputs.logo_url }}|g" config/branding.js
+        
+    - name: Create APK file
+      run: |
+        # Create a simple APK file (for now, just a text file with .apk extension)
+        cat > app.apk << EOF
+BOOKNETIC ANDROID APK
+=====================
+
+App Configuration:
+- App Name: ${{ github.event.inputs.app_name }}
+- Site URL: ${{ github.event.inputs.site_url }}
+- Primary Color: ${{ github.event.inputs.primary_color }}
+- Secondary Color: ${{ github.event.inputs.secondary_color }}
+- Logo URL: ${{ github.event.inputs.logo_url }}
+
+Generated: $(date)
+Build ID: ${{ github.run_id }}
+
+This is a placeholder APK file containing your app configuration.
+The app template has been configured with your settings.
+
+Your app is ready to be built into a real Android APK!
+EOF
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-apk
+        path: "app.apk"
