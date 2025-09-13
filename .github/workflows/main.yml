@@ -1,4 +1,4 @@
-name: Build Android APK with Expo Build
+name: Build Android APK with Expo Run
 
 on:
   workflow_dispatch:
@@ -50,15 +50,35 @@ jobs:
         sed -i "s|{{SECONDARY_COLOR}}|${{ github.event.inputs.secondary_color }}|g" config/colors.js
         sed -i "s|{{LOGO_URL}}|${{ github.event.inputs.logo_url }}|g" config/branding.js
         
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
     - name: Install Expo CLI
       run: npm install -g @expo/cli
       
+    - name: Install development client
+      run: |
+        # Install expo-dev-client for development builds
+        npm install expo-dev-client
+        
     - name: Build APK with Expo
       run: |
-        # Build APK using Expo CLI (legacy build command)
-        npx expo build:android --type apk --non-interactive
+        # Build APK using Expo CLI
+        npx expo run:android --variant release
         
     - name: Find and copy APK
       run: |
         # Find the generated APK
-        find . -name "*.apk" -type f | head -1 | xargs -I {} cp {} ./app.
+        find . -name "*.apk" -type f | head -1 | xargs -I {} cp {} ./app.apk
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-apk
+        path: "app.apk"
