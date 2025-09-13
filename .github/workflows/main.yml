@@ -1,0 +1,66 @@
+name: Build Android APK with Turtle
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'App Name'
+        required: true
+        default: 'Booknetic App'
+      site_url:
+        description: 'WordPress Site URL'
+        required: true
+        default: 'https://example.com'
+      primary_color:
+        description: 'Primary Color'
+        required: true
+        default: '#007AFF'
+      secondary_color:
+        description: 'Secondary Color'
+        required: true
+        default: '#5856D6'
+      logo_url:
+        description: 'Logo URL'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install
+        
+    - name: Configure app
+      run: |
+        # Update app configuration with provided values
+        sed -i "s/{{APP_NAME}}/${{ github.event.inputs.app_name }}/g" app.json
+        sed -i "s/{{SITE_URL}}/${{ github.event.inputs.site_url }}/g" config/api.js
+        sed -i "s/{{WORDPRESS_URL}}/${{ github.event.inputs.site_url }}/g" config/api.js
+        sed -i "s/{{PRIMARY_COLOR}}/${{ github.event.inputs.primary_color }}/g" config/colors.js
+        sed -i "s/{{SECONDARY_COLOR}}/${{ github.event.inputs.secondary_color }}/g" config/colors.js
+        sed -i "s/{{LOGO_URL}}/${{ github.event.inputs.logo_url }}/g" config/branding.js
+        
+    - name: Install Turtle CLI
+      run: npm install -g turtle-cli
+      
+    - name: Build APK with Turtle
+      run: |
+        # Build APK using Turtle CLI
+        turtle build:android --type apk --output ./app.apk
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-apk
+        path: "app.apk"
