@@ -1,4 +1,4 @@
-name: Build Android APK with Fixed Node
+name: Build Android APK with Expo
 
 on:
   workflow_dispatch:
@@ -50,41 +50,48 @@ jobs:
         sed -i "s|{{SECONDARY_COLOR}}|${{ github.event.inputs.secondary_color }}|g" config/colors.js
         sed -i "s|{{LOGO_URL}}|${{ github.event.inputs.logo_url }}|g" config/branding.js
         
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    - name: Install Expo CLI
+      run: npm install -g @expo/cli
       
-    - name: Create React Native project
+    - name: Install EAS CLI
+      run: npm install -g eas-cli
+      
+    - name: Create EAS configuration
       run: |
-        # Create a new React Native project without TypeScript template
-        npx react-native init BookneticApp
+        cat > eas.json << EOF
+        {
+          "cli": {
+            "version": ">= 3.0.0"
+          },
+          "build": {
+            "development": {
+              "developmentClient": true,
+              "distribution": "internal"
+            },
+            "preview": {
+              "distribution": "internal",
+              "android": {
+                "buildType": "apk"
+              }
+            },
+            "production": {
+              "android": {
+                "buildType": "apk"
+              }
+            }
+          }
+        }
+        EOF
         
-    - name: Copy app files
+    - name: Build APK with EAS
       run: |
-        # Copy our app files to the new project
-        cp -r . BookneticApp/
-        cd BookneticApp
+        # Build APK using EAS (local build)
+        eas build --platform android --profile preview --local --non-interactive
         
-    - name: Install project dependencies
+    - name: Find and copy APK
       run: |
-        cd BookneticApp
-        npm install
-        cd android && ./gradlew clean && cd ..
-        
-    - name: Build APK
-      run: |
-        cd BookneticApp
-        cd android
-        ./gradlew assembleDebug
-        
-    - name: Copy APK
-      run: |
-        cp BookneticApp/android/app/build/outputs/apk/debug/app-debug.apk ./app.apk
+        # Find the generated APK
+        find . -name "*.apk" -type f | head -1 | xargs -I {} cp {} ./app.apk
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
